@@ -1,12 +1,11 @@
 
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, Button } from 'react-native';
-// import ProfileScreen from './ProfileScreen';
-import Top from './Top';
-import Center from './Center';
-import Bottom from './Bottom';
+import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import React, { Component, useEffect, useState } from 'react';
-import Fetch from './Fetch'
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore'
+
 
 //   // Import the functions you need from the SDKs you need
 //   import firebase, { initializeApp } from "firebase/app";
@@ -38,120 +37,112 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
-/* const firebaseConfig = {
-  apiKey: "AIzaSyC3Utux3HBbOfQSOh6vsIF4HOC_mtZS7Sw",
-  authDomain: "labprac-ea091.firebaseapp.com",
-  projectId: "labprac-ea091",
-  storageBucket: "labprac-ea091.appspot.com",
-  messagingSenderId: "308945097858",
-  appId: "1:308945097858:web:a47acbbe9d0baaa16e509b"
+const firebaseConfig = {
+  apiKey: "AIzaSyD-kGrghZROqPE3KKlbbF_1YtKwcc-6YAc",
+  authDomain: "crudop-e988f.firebaseapp.com",
+  projectId: "crudop-e988f",
+  storageBucket: "crudop-e988f.appspot.com",
+  messagingSenderId: "1081901882548",
+  appId: "1:1081901882548:web:cd9558d0f79c67adbd4be1"
 };
 
-let app;
-
-if (firebase.apps.length === 0) {
-  app = firebase.initializeApp(firebaseConfig)
-} else {
-  app = firebase.app();
-}
-
-const db = app.firestore();
-const auth = firebase.auth(); */
+ const app = initializeApp(firebaseConfig);
+// MARK: Firestore Reference
+ const db = getFirestore(app);
 
 export default function Home({navigation}) {
 
-  const createUser = () => {
-    auth.createUserWithEmailAndPassword('akhzarn@yahoo.com','123456')
-    .then( data =>{
-      // QUERY Firestore Ko Data Send Kar dain gai
-      console.log('firebase return is = ',data)
-    }).catch(error=>{
-      console.log('Catch Error',error)
-    })
-  }
-  
-  const loginUser = () => {
-    auth.signInWithEmailAndPassword('akhzarn@yahoo.com','123456')
-    .then( data =>{
-      // QUERY Firestore Ko Data Send Kar dain gai
-      console.log('firebase return is = ',data)
-    }).catch(error=>{
-      console.log('Catch Error',error)
-    })
-  }
-  
-  const guestUser = () => {
-    auth.signInAnonymously()
-    .then( data =>{
-      // QUERY Firestore Ko Data Send Kar dain gai
-      console.log('firebase return is = ',data)
-    }).catch(error=>{
-      console.log('Catch Error',error)
-    })
-  }
-  
-  const logoutUser = () => {
-    auth.onAuthStateChanged(user=>{
-      if(user){
-        console.log('Logged in user is =', user)
-        auth.signOut()
-      }else{
-        console.log('No One is =', user)
-      }
-    })
-  }
+  const [userDoc, setUserDoc] = useState(null)
 
-  useEffect(()=>{
+  const [text, setText] = useState("")
 
-    global.setting={
-      fs:50,
-      fc:'green',
-      bc:'white'
+  const Create = () =>{
+    const myDoc = doc(db, "Student", "s1")
+
+
+    const docData = {
+      "Name": "Areeb",
+      "class": "BSE",
+      "roll": 22
     }
-
-
-      // db.collection('student')
-      //   .doc('R3v1dlrtVX8GBBsho4eS')
-      //   .onSnapshot(documentSnapshot => {
-      //     console.log('User data: ', documentSnapshot.data());
-      //   });
-      // Stop listening for updates when no longer required
-      // return () => subscriber();
-        
-  // const subscriber = db
-
-
-  /* db.collection('student')
-  .get()
-  .then(querySnapshot => {
-    console.log('Total users: ', querySnapshot.size);
-    querySnapshot.forEach(documentSnapshot => {
-      console.log('User ID: ', documentSnapshot.id, documentSnapshot.data());
-    });
-  }); */
-  // return () => subscriber();
-
-  }, [])
-
-  const [fonts, setFonts] = useState(16)
-
-  useEffect(() => {
-    // console.log('navigation useEffect is =')
-    const unsubscribe = navigation.addListener('focus', () => {
-      setFonts(global.setting.fs)
+  
+    setDoc(myDoc, docData)
       
-      console.log('navigation useEffect is Called=', global.setting)
+      .then(() => {
 
-    });
-    return unsubscribe;
-  }, [navigation]);
+        alert("Document Created!")
+      })
+      .catch((error) => {
 
+        alert(error.message)
+      })
+  
+  
+  }
+
+  const Read = () =>{
+    const myDoc = doc(db, "Student", "s1")
+
+    getDoc(myDoc)
+      .then((snapshot) => {
+        if (snapshot.exists) {
+          setUserDoc(snapshot.data())
+        }
+        else {
+          alert("No Doc Found")
+        }
+      })
+      .catch((error) => {
+        alert(error.message)
+      })
+    
+  }
+
+
+
+  
+  const Update = (value, merge) =>{
+    const myDoc = doc(db, "Student", "s1")
+
+    
+    setDoc(myDoc, value, { merge: merge })
+     
+      .then(() => {
+   
+        alert("Updated Successfully!")
+        setText("")
+      })
+      .catch((error) => {
+
+        alert(error.message)
+      })
+
+ 
+  }
+  
+  const Delete = () =>{
+    const myDoc = doc(db, "Student", "s1")
+
+    deleteDoc(myDoc)
+    
+      .then(() => {
+      
+        alert("Deleted Successfully!")
+      })
+      .catch((error) => {
+        
+        alert(error.message)
+      })
+
+  }
+
+  
   return (
-    <View style={{flex:1, backgroundColor:'white'}}>
+    <View style={{flex:1, backgroundColor:'gray'}}>
       
       {console.log('Return')}
 
-      <Text style={{fontSize:fonts}}> We are testing </Text>
+      {/* //<Text style={{fontSize:fonts}}> We are testing </Text> */}
 
       {/* <Button
           title="Go to Next Screen"
@@ -174,7 +165,7 @@ export default function Home({navigation}) {
         }
         /> */}
 
-      <Button
+      {/* <Button
           title="Go to Next Functional Component"
           onPress={() =>
             navigation.navigate('HomeForFunctional')
@@ -186,45 +177,53 @@ export default function Home({navigation}) {
           onPress={() =>
             navigation.navigate('HomeForClass')
           }
-        />
+        /> */}
 
-      <Button
-          title="Create USer"
-          onPress={createUser}
-        />
-     
-     <Button
-          title="Firebase Sign In"
-          onPress={loginUser}
-        />
-     
-     <Button
-          title="Guest User"
-          onPress={guestUser}
-        />
+      
 
-    <Button
-          title="Log Out User"
-          onPress={logoutUser}
-        />
-    <Button
-          title="Fetch"
-          onPress={() =>
-            navigation.navigate('Fetch')}
-        />
+       <Button color="green" title="Create new Student" onPress={Create}></Button>
+      <Button title="Read Recored"  onPress={Read}></Button>
+      
+        <TextInput style={{
+        width: '30%',
+        fontSize: 18,
+        padding: 12,
+        borderColor: 'gray',
+        borderWidth: 0.2,
+        borderRadius: 10,
+        marginVertical: 20
+      }} placeholder='Type Here' onChangeText={(text) => { setText(text) }} value={text}></TextInput>
 
-    </View>
-  );
+      <Button title='Update Doc' onPress={() => {
+        Update({
+          "Name": text
+        }, true)
+      }} disabled={text == ""}></Button>
+  <Button color="red" title='Delete Record' onPress={Delete}></Button>
+      {
+        userDoc != null &&
+        <Text style={{fontSize:30}}>Name: {userDoc.Name},
+         class: {userDoc.class}, roll: {userDoc. roll}</Text>
+      } 
+
+    </View> 
+
+  ); 
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'yellow',
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 0,
+    
   },
+  
+  
 });
+
 
 
 
